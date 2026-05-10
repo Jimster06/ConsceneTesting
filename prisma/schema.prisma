@@ -26,22 +26,25 @@ model Artist {
   genre    String?
   image    String?
   bio      String?
+  mbid     String?   @unique
   concerts Concert[]
 }
 
 model Concert {
-  id        String   @id @default(cuid())
-  title     String
-  artistId  String
-  venue     String
-  city      String
-  country   String
-  date      DateTime
-  image     String?
-  setlist   String?
-  createdAt DateTime @default(now())
-  artist    Artist   @relation(fields: [artistId], references: [id])
-  reviews   Review[]
+  id          String   @id @default(cuid())
+  title       String
+  artistId    String
+  venue       String
+  city        String
+  country     String
+  date        DateTime
+  image       String?
+  setlist     String?
+  setlistFmId String?  @unique
+  tourName    String?
+  createdAt   DateTime @default(now())
+  artist      Artist   @relation(fields: [artistId], references: [id])
+  reviews     Review[]
 }
 
 model Review {

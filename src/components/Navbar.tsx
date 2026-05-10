@@ -22,6 +22,9 @@ export function Navbar() {
           <Link href="/artists" className="hover:text-white transition-colors">
             Artists
           </Link>
+          <Link href="/import" className="hover:text-white transition-colors">
+            Import
+          </Link>
           {session ? (
             <>
               <Link
@@ -81,6 +84,9 @@ export function Navbar() {
           </Link>
           <Link href="/artists" onClick={() => setMenuOpen(false)} className="hover:text-white">
             Artists
+          </Link>
+          <Link href="/import" onClick={() => setMenuOpen(false)} className="hover:text-white">
+            Import
           </Link>
           {session ? (
             <>

@@ -107,6 +107,42 @@ export default async function ConcertPage({ params }: { params: { id: string } }
         )}
       </div>
 
+      {/* Setlist */}
+      {concert.setlist && (() => {
+        let songs: string[] = []
+        try { songs = JSON.parse(concert.setlist) } catch { songs = [concert.setlist] }
+        return songs.length > 0 ? (
+          <section className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-white">Setlist</h2>
+              <span className="text-brand-muted text-xs">{songs.length} songs</span>
+            </div>
+            <div className="bg-brand-card border border-brand-border rounded-xl p-4">
+              <ol className="space-y-1">
+                {songs.map((song, i) => (
+                  <li key={i} className="flex items-baseline gap-3 text-sm">
+                    <span className="text-brand-muted w-6 text-right shrink-0 tabular-nums">{i + 1}</span>
+                    <span className={song.includes('cover)') || song.includes('[tape]') ? 'text-brand-text' : 'text-white'}>
+                      {song}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+              {concert.setlistFmId && (
+                <a
+                  href={`https://www.setlist.fm/setlist/x/${concert.setlistFmId}.html`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-brand-muted text-xs hover:text-brand-green transition-colors mt-3 inline-block"
+                >
+                  View on setlist.fm →
+                </a>
+              )}
+            </div>
+          </section>
+        ) : null
+      })()}
+
       {/* Reviews */}
       <section className="space-y-4">
         <h2 className="text-lg font-semibold text-white">
