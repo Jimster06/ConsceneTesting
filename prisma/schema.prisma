@@ -1,0 +1,77 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  username  String   @unique
+  password  String
+  bio       String?
+  avatar    String?
+  createdAt DateTime @default(now())
+  reviews   Review[]
+  likes     Like[]
+}
+
+model Artist {
+  id       String    @id @default(cuid())
+  name     String
+  slug     String    @unique
+  genre    String?
+  image    String?
+  bio      String?
+  concerts Concert[]
+}
+
+model Concert {
+  id        String   @id @default(cuid())
+  title     String
+  artistId  String
+  venue     String
+  city      String
+  country   String
+  date      DateTime
+  image     String?
+  setlist   String?
+  createdAt DateTime @default(now())
+  artist    Artist   @relation(fields: [artistId], references: [id])
+  reviews   Review[]
+}
+
+model Review {
+  id        String      @id @default(cuid())
+  userId    String
+  concertId String
+  rating    Int
+  body      String?
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  user      User        @relation(fields: [userId], references: [id])
+  concert   Concert     @relation(fields: [concertId], references: [id])
+  media     ReviewMedia[]
+  likes     Like[]
+}
+
+model ReviewMedia {
+  id       String @id @default(cuid())
+  reviewId String
+  url      String
+  type     String // "image" | "video"
+  review   Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+}
+
+model Like {
+  id       String @id @default(cuid())
+  userId   String
+  reviewId String
+  user     User   @relation(fields: [userId], references: [id])
+  review   Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, reviewId])
+}
