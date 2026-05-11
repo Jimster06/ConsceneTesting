@@ -74,40 +74,43 @@ export default async function ConcertsPage({ searchParams }: PageProps) {
       ) : (
         <div className="space-y-3">
           {concerts.map((concert) => (
-            <Link
+            <div
               key={concert.id}
-              href={`/concerts/${concert.id}`}
-              className="flex items-start justify-between gap-4 bg-brand-card border border-brand-border rounded-lg p-4 hover:border-brand-green transition-colors group"
+              className="bg-brand-card border border-brand-border rounded-lg p-4 hover:border-brand-green transition-colors group"
             >
-              <div className="min-w-0">
-                <h2 className="font-semibold text-white text-sm group-hover:text-brand-green transition-colors truncate">
-                  {concert.title}
-                </h2>
-                <Link
-                  href={`/artists/${concert.artist.slug}`}
-                  onClick={(e) => e.stopPropagation()}
-                  className="text-brand-green text-xs hover:underline"
-                >
-                  {concert.artist.name}
-                </Link>
-                <p className="text-brand-muted text-xs mt-0.5">
-                  {concert.venue} · {concert.city} ·{' '}
-                  {new Date(concert.date).toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    year: 'numeric',
-                  })}
-                </p>
+              <div className="flex items-start justify-between gap-4">
+                <div className="min-w-0">
+                  <Link
+                    href={`/concerts/${concert.id}`}
+                    className="font-semibold text-white text-sm group-hover:text-brand-green transition-colors truncate block"
+                  >
+                    {concert.title}
+                  </Link>
+                  <Link
+                    href={`/artists/${concert.artist.slug}`}
+                    className="text-brand-green text-xs hover:underline"
+                  >
+                    {concert.artist.name}
+                  </Link>
+                  <p className="text-brand-muted text-xs mt-0.5">
+                    {concert.venue} · {concert.city} ·{' '}
+                    {new Date(concert.date).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                    })}
+                  </p>
+                </div>
+                <div className="text-right shrink-0">
+                  {concert.avgRating !== null && (
+                    <StarRating value={Math.round(concert.avgRating)} size="sm" />
+                  )}
+                  <p className="text-brand-muted text-xs mt-1">
+                    {concert._count.reviews} review{concert._count.reviews !== 1 ? 's' : ''}
+                  </p>
+                </div>
               </div>
-              <div className="text-right shrink-0">
-                {concert.avgRating !== null && (
-                  <StarRating value={Math.round(concert.avgRating)} size="sm" />
-                )}
-                <p className="text-brand-muted text-xs mt-1">
-                  {concert._count.reviews} review{concert._count.reviews !== 1 ? 's' : ''}
-                </p>
-              </div>
-            </Link>
+            </div>
           ))}
         </div>
       )}

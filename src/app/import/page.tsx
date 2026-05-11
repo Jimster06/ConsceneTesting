@@ -23,11 +23,21 @@ interface SlfmSetlist {
 
 type ImportStatus = 'idle' | 'importing' | 'done' | 'exists' | 'error'
 
+interface PopularResult {
+  artist: string
+  status: 'imported' | 'exists' | 'no_setlist' | 'error'
+  concertId?: string
+  title?: string
+}
+
 export default function ImportPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
 
   const [query, setQuery] = useState('')
+  const [popularLoading, setPopularLoading] = useState(false)
+  const [popularResults, setPopularResults] = useState<PopularResult[] | null>(null)
+  const [popularError, setPopularError] = useState<string | null>(null)
   const [searching, setSearching] = useState(false)
   const [artists, setArtists] = useState<SlfmArtist[]>([])
   const [selectedArtist, setSelectedArtist] = useState<SlfmArtist | null>(null)
@@ -89,6 +99,24 @@ export default function ImportPage() {
     }
   }, [router])
 
+  const importPopular = useCallback(async () => {
+    setPopularLoading(true)
+    setPopularResults(null)
+    setPopularError(null)
+    try {
+      const res = await fetch('/api/cron/import-popular', { method: 'POST' })
+      const data = await res.json()
+      if (!res.ok) {
+        setPopularError((data.error ?? `Server error ${res.status}`) + (data.detail ? ` — ${data.detail}` : ''))
+      } else {
+        setPopularResults(data.results ?? [])
+      }
+    } catch (e) {
+      setPopularError(String(e))
+    }
+    setPopularLoading(false)
+  }, [])
+
   const songCount = (setlist: SlfmSetlist) =>
     setlist.sets.set.reduce((n, s) => n + (s.song?.length ?? 0), 0)
 
@@ -119,6 +147,67 @@ export default function ImportPage() {
         <p className="text-brand-text text-sm mt-1">
           Search for an artist, browse their shows, and import with full setlist data.
         </p>
+      </div>
+
+      {/* Popular shows */}
+      <div className="bg-brand-card border border-brand-border rounded-xl p-5 space-y-4">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <h2 className="text-white font-semibold">Import Today&apos;s Popular Shows</h2>
+            <p className="text-brand-muted text-xs mt-0.5">
+              Pulls the top 10 artists from Spotify&apos;s Global Top 50 and imports their most recent show.
+            </p>
+          </div>
+          <button
+            onClick={importPopular}
+            disabled={popularLoading}
+            className="shrink-0 bg-brand-green text-black font-semibold px-4 py-2 rounded text-sm hover:bg-green-400 transition-colors disabled:opacity-50"
+          >
+            {popularLoading ? 'Importing…' : '↓ Import Popular'}
+          </button>
+        </div>
+
+        {popularError && (
+          <div className="pt-1 border-t border-brand-border text-sm text-red-400">
+            Error: {popularError}
+          </div>
+        )}
+
+        {popularResults && popularResults.length === 0 && (
+          <div className="pt-1 border-t border-brand-border text-sm text-brand-muted">
+            No results returned. Check that your SETLISTFM_API_KEY and SPOTIFY credentials are set in .env and restart the dev server.
+          </div>
+        )}
+
+        {popularResults && popularResults.length > 0 && (
+          <div className="space-y-1.5 pt-1 border-t border-brand-border">
+            {popularResults.map((r, i) => (
+              <div key={i} className="flex items-center justify-between text-sm gap-3">
+                <div className="min-w-0">
+                  <span className="font-medium text-white">{r.artist}</span>
+                  {r.title && <span className="text-brand-muted text-xs ml-2 truncate">{r.title}</span>}
+                </div>
+                <span className={`shrink-0 text-xs font-semibold px-2 py-0.5 rounded ${
+                  r.status === 'imported' ? 'bg-brand-green text-black' :
+                  r.status === 'exists' ? 'bg-brand-border text-brand-muted' :
+                  r.status === 'no_setlist' ? 'bg-brand-border text-brand-muted' :
+                  'bg-red-900 text-red-300'
+                }`}>
+                  {r.status === 'imported' ? '✓ Imported' :
+                   r.status === 'exists' ? 'Already added' :
+                   r.status === 'no_setlist' ? 'No setlist found' :
+                   'Error'}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="flex items-center gap-3 text-brand-muted">
+        <div className="flex-1 border-t border-brand-border" />
+        <span className="text-xs uppercase tracking-wider">or search manually</span>
+        <div className="flex-1 border-t border-brand-border" />
       </div>
 
       {/* Search */}

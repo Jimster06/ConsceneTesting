@@ -14,7 +14,7 @@ async function getFeed() {
         include: { artist: { select: { id: true, name: true, slug: true } } },
       },
       media: true,
-      _count: { select: { likes: true } },
+      _count: { select: { likes: true, comments: true } },
     },
   })
 }

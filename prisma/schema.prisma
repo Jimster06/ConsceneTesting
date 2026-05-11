@@ -8,15 +8,16 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  username  String   @unique
+  id        String    @id @default(cuid())
+  email     String    @unique
+  username  String    @unique
   password  String
   bio       String?
   avatar    String?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
   reviews   Review[]
   likes     Like[]
+  comments  Comment[]
 }
 
 model Artist {
@@ -59,6 +60,17 @@ model Review {
   concert   Concert     @relation(fields: [concertId], references: [id])
   media     ReviewMedia[]
   likes     Like[]
+  comments  Comment[]
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  reviewId  String
+  userId    String
+  body      String
+  createdAt DateTime @default(now())
+  review    Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id])
 }
 
 model ReviewMedia {
