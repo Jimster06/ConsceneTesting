@@ -107,7 +107,7 @@ export default function ImportPage() {
       const res = await fetch('/api/cron/import-popular', { method: 'POST' })
       const data = await res.json()
       if (!res.ok) {
-        setPopularError(data.error ?? `Server error ${res.status}`)
+        setPopularError((data.error ?? `Server error ${res.status}`) + (data.detail ? ` — ${data.detail}` : ''))
       } else {
         setPopularResults(data.results ?? [])
       }

@@ -18,8 +18,12 @@ async function getAccessToken(): Promise<string> {
     cache: 'no-store',
   })
 
-  if (!res.ok) throw new Error('Failed to get Spotify access token')
+  if (!res.ok) {
+    const body = await res.text()
+    throw new Error(`Spotify token error ${res.status}: ${body}`)
+  }
   const data = await res.json()
+  if (!data.access_token) throw new Error('Spotify token response missing access_token — check SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET in .env')
   return data.access_token
 }
 
@@ -36,7 +40,10 @@ export async function getGlobalTopArtists(limit = 10): Promise<SpotifyArtist[]> 
     cache: 'no-store',
   })
 
-  if (!res.ok) throw new Error('Failed to fetch Spotify top 50 playlist')
+  if (!res.ok) {
+    const body = await res.text()
+    throw new Error(`Spotify playlist error ${res.status}: ${body}`)
+  }
   const data = await res.json()
 
   const seen = new Set<string>()
