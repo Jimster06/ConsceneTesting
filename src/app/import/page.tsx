@@ -37,6 +37,7 @@ export default function ImportPage() {
   const [query, setQuery] = useState('')
   const [popularLoading, setPopularLoading] = useState(false)
   const [popularResults, setPopularResults] = useState<PopularResult[] | null>(null)
+  const [popularError, setPopularError] = useState<string | null>(null)
   const [searching, setSearching] = useState(false)
   const [artists, setArtists] = useState<SlfmArtist[]>([])
   const [selectedArtist, setSelectedArtist] = useState<SlfmArtist | null>(null)
@@ -101,9 +102,18 @@ export default function ImportPage() {
   const importPopular = useCallback(async () => {
     setPopularLoading(true)
     setPopularResults(null)
-    const res = await fetch('/api/cron/import-popular', { method: 'POST' })
-    const data = await res.json()
-    setPopularResults(data.results ?? [])
+    setPopularError(null)
+    try {
+      const res = await fetch('/api/cron/import-popular', { method: 'POST' })
+      const data = await res.json()
+      if (!res.ok) {
+        setPopularError(data.error ?? `Server error ${res.status}`)
+      } else {
+        setPopularResults(data.results ?? [])
+      }
+    } catch (e) {
+      setPopularError(String(e))
+    }
     setPopularLoading(false)
   }, [])
 
@@ -157,7 +167,19 @@ export default function ImportPage() {
           </button>
         </div>
 
-        {popularResults && (
+        {popularError && (
+          <div className="pt-1 border-t border-brand-border text-sm text-red-400">
+            Error: {popularError}
+          </div>
+        )}
+
+        {popularResults && popularResults.length === 0 && (
+          <div className="pt-1 border-t border-brand-border text-sm text-brand-muted">
+            No results returned. Check that your SETLISTFM_API_KEY and SPOTIFY credentials are set in .env and restart the dev server.
+          </div>
+        )}
+
+        {popularResults && popularResults.length > 0 && (
           <div className="space-y-1.5 pt-1 border-t border-brand-border">
             {popularResults.map((r, i) => (
               <div key={i} className="flex items-center justify-between text-sm gap-3">
