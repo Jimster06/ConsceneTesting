@@ -16,7 +16,7 @@ async function getConcert(id: string) {
         include: {
           user: { select: { id: true, username: true, avatar: true } },
           media: true,
-          _count: { select: { likes: true } },
+          _count: { select: { likes: true, comments: true } },
         },
       },
     },
